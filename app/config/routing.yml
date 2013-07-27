@@ -1,0 +1,3 @@
+evan_base_route:
+    route: /
+    controller: plop
