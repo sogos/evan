@@ -9,4 +9,4 @@ echo $app['request']->getUri();
 echo "<br>";
 echo $app['request']->getBrowserLang();
 echo "<br>";
-var_dump($app['routes']);
+var_dump($app['routing']);

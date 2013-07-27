@@ -15,7 +15,7 @@ $app['request'] = $app->share(function ($app) {
 
 // Routing Processor
 $app['config_routing_file'] = __DIR__. '/config/routing.yml';
-$app['routes'] = $app->share(function ($app) {
+$app['routing'] = $app->share(function ($app) {
 	$route_yml = new Yaml();
 	$route_parsed = $route_yml->parse($app['config_routing_file']);
 	return $route_parsed;
