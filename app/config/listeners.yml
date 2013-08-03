@@ -1,0 +1,8 @@
+event_listeners:
+    base_route:
+        class: "Evan\Routing\EventListeners\RouteListener"
+        arguments:
+            "@app"
+        subscribe:
+            addRouteBefore: addRouteBefore
+            addRouteAfter: addRouteAfter
