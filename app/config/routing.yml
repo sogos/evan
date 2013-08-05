@@ -1,14 +1,21 @@
 routing:
     evan_base_route:
         route: /
-        controller: "Evan\Controller\BaseController"
+        controller: "Evan\Controller\TestController"
         action: "index"
         methods: "GET|POST"
         options:
             expose: true
     evan_test_route:
         route: /test/{toto}
-        controller: plop
+        controller: "Evan\Controller\TestController"
+        action: "index"
+        methods: "GET|POST"
+        options:
+            expose: false
+    evan_plop_route:
+        route: /plop/{toto}
+        controller: "Evan\Controller\TestController"
         action: "index"
         methods: "GET|POST"
         options:

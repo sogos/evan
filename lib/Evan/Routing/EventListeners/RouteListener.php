@@ -5,6 +5,8 @@ namespace Evan\Routing\EventListeners;
 use Evan\Events\EventListenerInterface;
 use Evan\Routing\Events\AddRouteBeforeEvent;
 use Evan\Routing\Events\AddRouteAfterEvent;
+use Evan\Routing\Events\RouteNotFoundEvent;
+use Evan\Controller\Controller as BaseController;
 
 class RouteListener implements EventListenerInterface
 {
@@ -31,6 +33,16 @@ class RouteListener implements EventListenerInterface
 			$routes_after = array_merge($routes_after, $route_array);
 		}
 		$event->setRoutesAfter($routes_after);
+		return $event;
+	}
+
+	public function routeNotFound(RouteNotFoundEvent $event) {
+
+		$app = $event->getApp();
+		$ControllerFactory = $app['controller_factory'];
+		$controller = $ControllerFactory->getDefaultController();
+		$controller->routenotFound404($event->getRequest());
+		$event->stopPropagation();
 		return $event;
 	}
 }

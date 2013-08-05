@@ -8,11 +8,16 @@ use Evan\Routing\RouteCollector;
 use Evan\Events\Master as EventMaster;
 use Evan\Routing\EventListeners\RouteListener;
 use Evan\Routing\RouteMatcher;
+use Evan\Controller\ControllerFactory;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
 
-require_once("../vendor/autoload.php");
+require_once(dirname(__FILE__). "/../vendor/autoload.php");
 
 $app = New \Pimple();
-
+$app['app_path'] = dirname(__FILE__);
+$app['root_path'] = dirname(__FILE__. '/../');
+$app['web_path'] = dirname(__FILE__. '/../');
 try{
 
 // Plug Event Master
@@ -43,6 +48,7 @@ try{
 
 // Twig Loading
 	$app['twig_filesystem_location'] = __DIR__.'/Resources/views/';
+	$app['twig_cache_path'] = __DIR__.'/cache/twig/';
 	$app['twig.form.templates'] = array('form_div_layout.html.twig');
 	$app['twig.loader.filesystem'] =  $app->share(function ($app) {
 		return new \Twig_Loader_Filesystem($app['twig_filesystem_location']);
@@ -58,33 +64,30 @@ try{
 			$app['twig.loader.filesystem'],
 			));
 	});
-$app['charset'] = 'utf8';
-$app['debug'] = true;
-// $app['translator'] = function($app) {
-// 	return new Translator($app['locale']);
-// };
+	$app['charset'] = 'utf8';
 
 	$app['debug'] = true;
 	$app['twig'] = function ($app) {
-	$app['twig.options'] = array();
-	$app['twig.form.templates'] = array('form_div_layout.html.twig');
-	$app['twig.path'] = array();
-	$app['twig.templates'] = array();
-	$app['twig.options'] = array_replace(
-		array(
-			'charset'          => $app['charset'],
-			'debug'            => $app['debug'],
-			'strict_variables' => $app['debug'],
-			), $app['twig.options']
-		);
+		$app['twig.options'] = array();
+		$app['twig.form.templates'] = array('form_div_layout.html.twig');
+		$app['twig.path'] = array();
+		$app['twig.templates'] = array();
+		$app['twig.options'] = array_replace(
+			array(
+				'charset'          => $app['charset'],
+				'debug'            => $app['debug'],
+				'strict_variables' => $app['debug'],
+				'cache'			   => $app['twig_cache_path']
+				), $app['twig.options']
+			);
 
-	$twig = new \Twig_Environment($app['twig.loader'], $app['twig.options']);
-	$twig->addGlobal('app', $app);
+		$twig = new \Twig_Environment($app['twig.loader'], $app['twig.options']);
+		$twig->addGlobal('app', $app);
 	//$twig->addExtension(new TwigCoreExtension());
 
-	if ($app['debug']) {
-		$twig->addExtension(new \Twig_Extension_Debug());
-	}
+		if ($app['debug']) {
+			$twig->addExtension(new \Twig_Extension_Debug());
+		}
 
 	// if (class_exists('Symfony\Bridge\Twig\Extension\RoutingExtension')) {
 	// 	if (isset($app['url_generator'])) {
@@ -117,8 +120,8 @@ $app['debug'] = true;
 	// 	}
 	//}
 
-	return $twig;
-};
+		return $twig;
+	};
 
 // Request processing 
 	$app['request'] = $app->share(function ($app) {
@@ -159,6 +162,33 @@ $app['debug'] = true;
 	return $app['route_collector']->getRoutes();
 });
 
+	$app['doctrine_mapping_path'] = array(
+		'default' => __DIR__
+		);
+
+	$paths = array($app['doctrine_mapping_path']['default']);
+	$isDevMode = false;
+
+// the connection configuration
+	$dbParams = array(
+		'driver'   => 'pdo_mysql',
+		'user'     => 'root',
+		'password' => '',
+		'dbname'   => 'foo',
+		);
+
+	$app['doctrine_config'] = $app->share(function ($app) use($paths, $isDevMode) {
+		//$config = Setup::createXMLMetadataConfiguration($paths, $isDevMode);
+		//$config = Setup::createYAMLMetadataConfiguration($paths, $isDevMode);
+		return Setup::createAnnotationMetadataConfiguration($paths, $isDevMode);
+	});
+	$app['doctrine_entity_manager'] = $app->share(function ($app) use ($dbParams) {
+		return EntityManager::create($dbParams, $app['doctrine_config']);
+	});
+
+	$app['controller_factory'] = $app->share(function ($app)  {
+		return new ControllerFactory($app);
+	});
 
 
 

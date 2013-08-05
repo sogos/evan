@@ -6,3 +6,11 @@ event_listeners:
         subscribe:
             addRouteBefore: addRouteBefore
             addRouteAfter: addRouteAfter
+            routeNotFound: routeNotFound
+# Listener in charge of EmptyControllerClass submitted to ControllerFactory
+    empty_controller_manipulator:
+        class: "Evan\Controller\EventListeners\DefaultControllerListener"
+        arguments:
+            "@app"
+        subscribe:
+            newControllerInstanceBefore: newControllerInstanceBefore

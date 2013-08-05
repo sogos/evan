@@ -21,6 +21,9 @@ class Master
 		if(array_key_exists($alias, $this->event_listeners)) {
 			foreach($this->event_listeners[$alias] as $listener_alias => $callback) {
 				$event = $this->app[$listener_alias]->$callback($event);
+				if($event->getPropagation() == false) {
+					break;
+				}
 			}
 		}
 		return $event;
