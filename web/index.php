@@ -1,19 +1,18 @@
 <?php
 
 
-function convert($size)
- {
-    $unit=array('b','kb','mb','gb','tb','pb');
-    return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
- }
-
 require_once("../app/Kernel.php");
+ini_set('xdebug.max_nesting_level', 300);
 
+// $app['time'] = function ($app) {
+// 	return (microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"]);
+// };
 
-$app['time'] = function ($app) {
-	return (microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"]);
-};
+try {
 
-$result = $app['request']->handle();
+	$app['request']->handle();
 
-
+} catch(\Exception $e) {
+	echo "<pre>";
+	echo $e->getMessage();
+}

@@ -1,0 +1,13 @@
+bdds:
+    default:
+        driver: pdo_mysql
+        host: evan
+        user: evan
+        password: "evan"
+        dbname: evan
+    bdd1:
+        driver: pdo_mysql
+        host: evan
+        user: evan
+        password: "evan"
+        dbname: evan_bdd1

@@ -4,6 +4,7 @@ namespace Evan\Routing\Events;
 
 use Evan\Events\Event;
 use Evan\Request\Request;
+use Evan\Conroller\ControllerFactory;
 
 class RouteNotFoundEvent extends Event
 {
@@ -11,12 +12,12 @@ class RouteNotFoundEvent extends Event
 	protected $uri;
 	protected $route;
 	protected $request;
-	protected $app;
+	protected $ControllerFactory;
 
-	public function __construct(Request $request, &$app)
+	public function __construct(Request $request,ControllerFactory &$ControllerFactory)
 	{
 		$this->request = $request;
-		$this->app = &$app;
+		$this->ControllerFactory = &$ControllerFactory;
 	}
 
 	public function getRoute()
@@ -39,9 +40,9 @@ class RouteNotFoundEvent extends Event
 		$this->route = $route;
 	}
 
-	public function getApp()
+	public function getControllerFactory()
 	{
-		return $this->app;
+		return $this->ControllerFactory;
 	}
 
 

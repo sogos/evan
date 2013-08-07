@@ -1,0 +1,20 @@
+Evan\Entity\Plop:
+    type: entity
+    table: plop
+    fields:
+        id:
+            id: true
+            type: integer
+            unsigned: false
+            nullable: false
+            generator:
+                strategy: IDENTITY
+        title:
+            type: string
+            length: 255
+            fixed: false
+            nullable: false
+        content:
+            type: text
+            nullable: true
+    lifecycleCallbacks: {  }

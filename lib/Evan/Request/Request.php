@@ -3,16 +3,18 @@
 namespace Evan\Request; 
 
 use Evan\Routing\Events\RouteNotFoundEvent;
+use Evan\Container\ContainerAccess;
 
-class Request
+class Request extends ContainerAccess
 {
 
 	protected $server_method;
 	protected $uri;
 	protected $lang;
 
-	public function __construct(&$app) {
+	public function __construct(&$container) {
 
+		parent::__construct($container);
 		$this->server_method = $_SERVER['REQUEST_METHOD'];
 		$this->uri = $_SERVER['REQUEST_URI'];
 		try {
@@ -20,7 +22,6 @@ class Request
 		} catch(\Exception $e) {
 			die($e->getMessage());
 		}
-		$this->app = &$app;
 	}
 
 	public function getMethod()
@@ -39,9 +40,14 @@ class Request
 	}
 
 	public function handle() {
-		$route = $this->app['route_matcher']->findRoute($this->getUri(), $this->app['routing_schema'], $this->getMethod());
+		if(null == $this->get('route_matcher') || is_null($this->get('routing_schema'))) {
+			throw new \Evan\Exception\Exception(get_class($this) . ": The container refuse to give grant access to route_matcher or routing_schema");
+			
+		}
+
+		$route = $this->get('route_matcher')->findRoute($this->getUri(), $this->get('routing_schema'), $this->getMethod());
 		if($route) {
-			//echo "<pre>";
+
 			 
 			$route_exploded = explode("/", $route['route']);
 			$uri_exploded = explode("/", $this->getUri());
@@ -69,11 +75,11 @@ class Request
 
 
 			}
-			$this->app['controller_factory']->get($route['controller']);
-			call_user_func_array(array($this->app['controller_'. $route['controller']], $route['action']), $parameters_to_pass);
+			$this->get('controller_factory')->getController($route['controller']);
+			call_user_func_array(array($this->get('controller_'. $route['controller']), $route['action']), $parameters_to_pass);
 
 		} else {
-			$route_not_found_event = $this->app['event_master']->triggerEvent(new RouteNotFoundEvent($this, $this->app), 'routeNotFound');
+			$route_not_found_event = $this->get('event_master')->triggerEvent(new RouteNotFoundEvent($this, $this->get('controller_factory')), 'routeNotFound');
 		}		
 	}
 }

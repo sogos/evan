@@ -6,7 +6,7 @@ use Doctrine\ORM\Tools\Console\ConsoleRunner;
 require_once 'Kernel.php';
 
 // replace with mechanism to retrieve EntityManager in your app
-$entityManager = $app['doctrine_entity_manager'];
+$entityManager = $app['entityManager'];
 
 $helperSet = new Symfony\Component\Console\Helper\HelperSet(array(
     'db' => new \Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper($entityManager->getConnection()),

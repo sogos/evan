@@ -3,6 +3,7 @@
 use Evan\Request\Request;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Parser as YamlParser;
+use Evan\Container\Container;
 use Evan\Exception\Exception as EvanException;
 use Evan\Routing\RouteCollector;
 use Evan\Events\Master as EventMaster;
@@ -10,19 +11,33 @@ use Evan\Routing\EventListeners\RouteListener;
 use Evan\Routing\RouteMatcher;
 use Evan\Controller\ControllerFactory;
 use Doctrine\ORM\Tools\Setup;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Configuration;
+use Doctrine\ORM\Configuration as ORMConfiguration;
+use Doctrine\Common\EventManager;
+use Doctrine\ORM\Mapping\Driver\DriverChain;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\ORM\EntityManager;
 
 require_once(dirname(__FILE__). "/../vendor/autoload.php");
+AnnotationRegistry::registerFile(__DIR__.'/../vendor/doctrine/orm/lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php');
 
 $app = New \Pimple();
 $app['app_path'] = dirname(__FILE__);
 $app['root_path'] = dirname(__FILE__. '/../');
 $app['web_path'] = dirname(__FILE__. '/../');
+
 try{
+
+// APP Container
+	$app['container'] = $app->share(function (&$app) {
+		return New Container($app);
+	});
+
 
 // Plug Event Master
 	$app['event_master'] = $app->share(function ($app) {
-		return new EventMaster($app);
+		return new EventMaster($app['container']);
 	});
 
 
@@ -125,7 +140,7 @@ try{
 
 // Request processing 
 	$app['request'] = $app->share(function ($app) {
-		return new Request($app);
+		return new Request($app['container']);
 	});
 
 
@@ -138,12 +153,12 @@ try{
 
 	// Route Matcher
 	$app['route_matcher'] = $app->share(function ($app) {
-		return new RouteMatcher($app);
+		return new RouteMatcher($app['container']);
 	});
 
 
 	$app['route_collector'] = $app->share(function ($app) {
-		return new RouteCollector($app);
+		return new RouteCollector($app['container']);
 	});
 
 	$app['routing_schema'] = $app->share(function ($app) {
@@ -162,37 +177,181 @@ try{
 	return $app['route_collector']->getRoutes();
 });
 
-	$app['doctrine_mapping_path'] = array(
-		'default' => __DIR__
-		);
 
-	$paths = array($app['doctrine_mapping_path']['default']);
-	$isDevMode = false;
+	$app['application_parameters_file'] = __DIR__. '/config/parameters.yml';
+	$parameters_yml = new Yaml();
+	$parameters_parsed = $parameters_yml->parse($app['application_parameters_file']);
 
-// the connection configuration
-	$dbParams = array(
+	$app['dbs.options'] = array();
+
+	if(array_key_exists("bdds", $parameters_parsed) && sizeof($parameters_parsed["bdds"]) > 0) {
+		
+		foreach($parameters_parsed['bdds'] as $alias => $arguments)
+		{
+			if( array_key_exists('driver', $arguments)
+				&&  array_key_exists('user', $arguments)
+				&&  array_key_exists('dbname', $arguments)
+				&&  array_key_exists('host', $arguments)) 
+			{
+				$app['dbs.options'] = array_merge($app['dbs.options'], array($alias => $arguments)); 
+			}
+		}
+	}
+
+	$app['db.default_options'] = array(
 		'driver'   => 'pdo_mysql',
+		'dbname'   => null,
+		'host'     => 'localhost',
 		'user'     => 'root',
-		'password' => '',
-		'dbname'   => 'foo',
+		'password' => null,
+		'port'     => null,
 		);
 
-	$app['doctrine_config'] = $app->share(function ($app) use($paths, $isDevMode) {
-		//$config = Setup::createXMLMetadataConfiguration($paths, $isDevMode);
-		//$config = Setup::createYAMLMetadataConfiguration($paths, $isDevMode);
-		return Setup::createAnnotationMetadataConfiguration($paths, $isDevMode);
-	});
-	$app['doctrine_entity_manager'] = $app->share(function ($app) use ($dbParams) {
-		return EntityManager::create($dbParams, $app['doctrine_config']);
+	$app['dbs.options.initializer'] = $app->protect(function () use ($app) {
+		static $initialized = false;
+
+		if ($initialized) {
+			return;
+		}
+
+		$initialized = true;
+
+		if (!isset($app['dbs.options'])) {
+			$app['dbs.options'] = array('default' => isset($app['db.options']) ? $app['db.options'] : array());
+		}
+
+		$tmp = $app['dbs.options'];
+		foreach ($tmp as $name => &$options) {
+			$options = array_replace($app['db.default_options'], $options);
+
+			if (!isset($app['dbs.default'])) {
+				$app['dbs.default'] = $name;
+			}
+		}
+		$app['dbs.options'] = $tmp;
 	});
 
-	$app['controller_factory'] = $app->share(function ($app)  {
-		return new ControllerFactory($app);
+	$app['dbs'] = $app->share(function ($app) {
+		$app['dbs.options.initializer']();
+
+		$dbs = new \Pimple();
+		foreach ($app['dbs.options'] as $name => $options) {
+			if ($app['dbs.default'] === $name) {
+                    // we use shortcuts here in case the default has been overridden
+				$config = $app['db.config'];
+				$manager = $app['db.event_manager'];
+			} else {
+				$config = $app['dbs.config'][$name];
+				$manager = $app['dbs.event_manager'][$name];
+			}
+
+			$dbs[$name] = $dbs->share(function ($dbs) use ($options, $config, $manager) {
+				return DriverManager::getConnection($options, $config, $manager);
+			});
+		}
+
+		return $dbs;
 	});
+
+	$app['dbs.config'] = $app->share(function ($app) {
+		$app['dbs.options.initializer']();
+
+		$configs = new \Pimple();
+		foreach ($app['dbs.options'] as $name => $options) {
+			$configs[$name] = new Configuration();
+
+			// if (isset($app['logger']) && class_exists('Symfony\Bridge\Doctrine\Logger\DbalLogger')) {
+			// 	$configs[$name]->setSQLLogger(new DbalLogger($app['logger'], isset($app['stopwatch']) ? $app['stopwatch'] : null));
+			// }
+		}
+
+		return $configs;
+	});
+
+	$app['dbs.event_manager'] = $app->share(function ($app) {
+		$app['dbs.options.initializer']();
+
+		$managers = new \Pimple();
+		foreach ($app['dbs.options'] as $name => $options) {
+			$managers[$name] = new EventManager();
+		}
+
+		return $managers;
+	});
+
+        // shortcuts for the "first" DB
+	$app['db'] = $app->share(function ($app) {
+		$dbs = $app['dbs'];
+
+		return $dbs[$app['dbs.default']];
+	});
+
+	$app['db.config'] = $app->share(function ($app) {
+		$dbs = $app['dbs.config'];
+
+		return $dbs[$app['dbs.default']];
+	});
+
+	$app['db.event_manager'] = $app->share(function ($app) {
+		$dbs = $app['dbs.event_manager'];
+
+		return $dbs[$app['dbs.default']];
+	});
+
+
+
+// driver chain
+
+	$app['entityManager'] = $app->share(function ($app) {
+		$doctrine_config = new ORMConfiguration;
+		if ($app['debug']) {
+			$doctrine_cache = new \Doctrine\Common\Cache\ArrayCache;
+			$doctrine_config->setAutoGenerateProxyClasses(true);
+		} else {
+			$doctrine_cache = new \Doctrine\Common\Cache\ApcCache;
+			$doctrine_config->setAutoGenerateProxyClasses(false);
+		}
+		$driverChain = new DriverChain();
+	// Annotation
+		// $annotationReader = new \Doctrine\Common\Annotations\AnnotationReader();
+		// $annotationDriver = Doctrine\ORM\Mapping\Driver\AnnotationDriver::create(array(__DIR__),$annotationReader);
+	// Yaml
+		$yamlDriver = new \Doctrine\ORM\Mapping\Driver\YamlDriver(array(
+				'Evan\\Entity' => __DIR__.'/../lib/Evan/Orm/',
+				'Evan\\Entity2' => __DIR__.'/../lib/Evan/Orm2/',
+				), '.orm.yml');
+
+
+//		$driverChain->addDriver($annotationDriver, 'Entity');
+		$driverChain->addDriver($yamlDriver,'Evan\Entity');
+		$driverChain->setDefaultDriver($yamlDriver);
+		$doctrine_config->setMetadataCacheImpl($doctrine_cache);
+		$doctrine_config->setMetadataDriverImpl($driverChain);
+		$doctrine_config->setQueryCacheImpl($doctrine_cache);
+		$doctrine_config->setProxyDir(__DIR__.'/cache/doctrine_proxies/');
+		$doctrine_config->setProxyNamespace('Evan\Proxies');
+		$entityManager = EntityManager::create($app['dbs']['bdd1'], $doctrine_config);
+		return $entityManager;
+
+	});
+
+
+//var_dump($app['doctrine_config']);
+
+$app['controller_factory'] = $app->share(function ($app)  {
+	return new ControllerFactory($app['container'] );
+});
+
+$app['time'] = function ($app) {
+	return (microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"]);
+};
+
+
 
 
 
 } catch (\Exception $e) {
+	echo get_class($e);
 	die("Oops: " . $e->getMessage());
 
 }

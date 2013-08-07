@@ -4,4 +4,11 @@
 
 Coucou {{ toto }}
 
+{% for plop in all_plop %}
+	
+	<h3>{{ plop.title }}</h3>
+		{{ plop.content|raw }}
+
+{% endfor %}
+
 {% endblock %}

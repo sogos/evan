@@ -2,15 +2,15 @@
 
 namespace Evan\Events;
 
-class Master
+
+use Evan\Container\ContainerAccess;
+
+class Master extends ContainerAccess
 {
 
 	protected $event_listeners = array();
 	protected $events_triggered = array();
 
-	function __construct(&$app) {
-		$this->app = $app;
-	}
 
 	function triggerEvent(EventInterface $event, $alias)
 	{
@@ -20,7 +20,11 @@ class Master
 			);
 		if(array_key_exists($alias, $this->event_listeners)) {
 			foreach($this->event_listeners[$alias] as $listener_alias => $callback) {
-				$event = $this->app[$listener_alias]->$callback($event);
+				if(is_null($this->get($listener_alias))) {
+					throw new \Evan\Exception\Exception(get_class($this) . ": The container refuse to give grant access to " . $listener_alias);
+
+				}
+				$event = $this->get($listener_alias)->$callback($event);
 				if($event->getPropagation() == false) {
 					break;
 				}

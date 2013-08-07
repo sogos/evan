@@ -38,8 +38,7 @@ class RouteListener implements EventListenerInterface
 
 	public function routeNotFound(RouteNotFoundEvent $event) {
 
-		$app = $event->getApp();
-		$ControllerFactory = $app['controller_factory'];
+		$ControllerFactory = $event->getControllerFactory();
 		$controller = $ControllerFactory->getDefaultController();
 		$controller->routenotFound404($event->getRequest());
 		$event->stopPropagation();
