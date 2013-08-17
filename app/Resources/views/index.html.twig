@@ -125,6 +125,21 @@
 							{% endfor %}
 						</ul>
 						{% endif %}
+						{% if all_queries|length > 0 %}
+						<h4>SQL Queries</h4>
+						<ul>
+
+							{% for query in all_queries %}
+							<li> SQL: "{{ query.sql}}"
+								<ul>
+									<li>Time: "{{ query.time}}"</li>
+
+								</ul>
+							</li>
+							{% endfor %}
+						</ul>
+						{% endif %}
+						<br><br><br>
 					</div>
 				</div>
 			</div>

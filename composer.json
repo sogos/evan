@@ -13,15 +13,18 @@
         "php": ">=5.4.0",
         "twig/twig": "1.13.*@dev",
         "pimple/pimple": "1.0.*@dev",
-	"phpunit/phpunit": "dev-configuration",
-	"phpunit/php-code-coverage": "1.3.*@dev",
-	"phpunit/php-timer": "dev-master",
-	"phpunit/phpunit-mock-objects": "1.3.*@dev",
-    "doctrine/orm": "*"
+    	"phpunit/phpunit": "*",
+    	"phpunit/php-code-coverage": "*",
+    	"phpunit/php-timer": "*",
+    	"phpunit/phpunit-mock-objects": "*",
+        "doctrine/orm": "*"
     },
     "minimum-stability": "stable",
     "extra": {
         "evan-app-dir": "app",
         "evan-web-dir": "web"
+    },
+    "config": {
+        "bin-dir": "bin/"
     }
 }

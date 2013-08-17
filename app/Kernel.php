@@ -10,6 +10,8 @@ use Evan\Events\Master as EventMaster;
 use Evan\Routing\EventListeners\RouteListener;
 use Evan\Routing\RouteMatcher;
 use Evan\Controller\ControllerFactory;
+use Evan\Logger\Doctrine\DoctrineSQLLogger;
+use Evan\Logger\Doctrine\QueriesCollector;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Configuration;
@@ -19,14 +21,14 @@ use Doctrine\ORM\Mapping\Driver\DriverChain;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\ORM\EntityManager;
 
+
 require_once(dirname(__FILE__). "/../vendor/autoload.php");
 AnnotationRegistry::registerFile(__DIR__.'/../vendor/doctrine/orm/lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php');
 
 $app = New \Pimple();
-$app['app_path'] = dirname(__FILE__);
-$app['root_path'] = dirname(__FILE__. '/../');
-$app['web_path'] = dirname(__FILE__. '/../');
-
+$app['app_path'] = dirname(__FILE__) . '/' ;
+$app['root_path'] = dirname(__FILE__). '/../';
+$app['web_path'] = dirname(__FILE__). '/../web/';
 try{
 
 // APP Container
@@ -178,6 +180,21 @@ try{
 });
 
 
+		$app['DoctrineLoggerChain'] = $app->share(function ($app) {
+		return New \Doctrine\DBAL\Logging\LoggerChain();
+	});
+
+	$app['BaseSQLLogger'] = $app->share(function ($app) {
+		return new DoctrineSQLLogger($app['container']);
+
+	});
+
+	$app['queries_collector'] =  $app->share(function ($app) {
+		return new QueriesCollector();
+	});
+
+	$app['DoctrineLoggerChain']->addLogger($app['BaseSQLLogger']);
+
 	$app['application_parameters_file'] = __DIR__. '/config/parameters.yml';
 	$parameters_yml = new Yaml();
 	$parameters_parsed = $parameters_yml->parse($app['application_parameters_file']);
@@ -260,9 +277,9 @@ try{
 		foreach ($app['dbs.options'] as $name => $options) {
 			$configs[$name] = new Configuration();
 
-			// if (isset($app['logger']) && class_exists('Symfony\Bridge\Doctrine\Logger\DbalLogger')) {
-			// 	$configs[$name]->setSQLLogger(new DbalLogger($app['logger'], isset($app['stopwatch']) ? $app['stopwatch'] : null));
-			// }
+			 if (isset($app['DoctrineLoggerChain']) ) {
+				$configs[$name]->setSQLLogger($app['DoctrineLoggerChain']);
+			 }
 		}
 
 		return $configs;
@@ -302,8 +319,13 @@ try{
 
 // driver chain
 
+
+
 	$app['entityManager'] = $app->share(function ($app) {
 		$doctrine_config = new ORMConfiguration;
+
+		$doctrine_config->setSQLLogger($app['DoctrineLoggerChain']);
+
 		if ($app['debug']) {
 			$doctrine_cache = new \Doctrine\Common\Cache\ArrayCache;
 			$doctrine_config->setAutoGenerateProxyClasses(true);
@@ -317,9 +339,10 @@ try{
 		// $annotationDriver = Doctrine\ORM\Mapping\Driver\AnnotationDriver::create(array(__DIR__),$annotationReader);
 	// Yaml
 		$yamlDriver = new \Doctrine\ORM\Mapping\Driver\YamlDriver(array(
-				'Evan\\Entity' => __DIR__.'/../lib/Evan/Orm/',
-				'Evan\\Entity2' => __DIR__.'/../lib/Evan/Orm2/',
-				), '.orm.yml');
+			'Evan\\Entity' => __DIR__.'/../lib/Evan/Orm/',
+			'Evan\\Entity2' => __DIR__.'/../lib/Evan/Orm2/',
+			), '.orm.yml');
+
 
 
 //		$driverChain->addDriver($annotationDriver, 'Entity');
@@ -348,10 +371,10 @@ $app['time'] = function ($app) {
 
 
 
-
-
 } catch (\Exception $e) {
 	echo get_class($e);
 	die("Oops: " . $e->getMessage());
 
 }
+
+return $app;
