@@ -57,7 +57,7 @@
                     "email": "kontakt@beberlei.de"
                 },
                 {
-                    "name": "Johannes Schmitt",
+                    "name": "Johannes M. Schmitt",
                     "email": "schmittjoh@gmail.com",
                     "homepage": "http://jmsyst.com",
                     "role": "Developer of wrapped JMSSerializerBundle"
@@ -213,12 +213,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "602a0bcda51b91a5617cd01d3f0b908ab3e96fcb"
+                "reference": "4f586949108fc7c4281ff2812771614caebf1cab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/602a0bcda51b91a5617cd01d3f0b908ab3e96fcb",
-                "reference": "602a0bcda51b91a5617cd01d3f0b908ab3e96fcb",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/4f586949108fc7c4281ff2812771614caebf1cab",
+                "reference": "4f586949108fc7c4281ff2812771614caebf1cab",
                 "shasum": ""
             },
             "require": {
@@ -267,7 +267,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2013-08-02 21:38:25"
+            "time": "2013-08-17 10:51:55"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -535,12 +535,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit-mock-objects.git",
-                "reference": "7d47689b552f6bad9d17284ab4347c2ed127cc77"
+                "reference": "4edd915891b08e2a0a09b07e93072161854e2484"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit-mock-objects/zipball/7d47689b552f6bad9d17284ab4347c2ed127cc77",
-                "reference": "7d47689b552f6bad9d17284ab4347c2ed127cc77",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit-mock-objects/zipball/4edd915891b08e2a0a09b07e93072161854e2484",
+                "reference": "4edd915891b08e2a0a09b07e93072161854e2484",
                 "shasum": ""
             },
             "require": {
@@ -585,7 +585,7 @@
                 "mock",
                 "xunit"
             ],
-            "time": "2013-07-23 04:52:47"
+            "time": "2013-08-14 13:48:07"
         },
         {
             "name": "pimple/pimple",
@@ -783,17 +783,17 @@
         },
         {
             "name": "symfony/console",
-            "version": "v2.3.2",
+            "version": "v2.3.3",
             "target-dir": "Symfony/Component/Console",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Console.git",
-                "reference": "v2.3.2"
+                "reference": "v2.3.3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Console/zipball/v2.3.2",
-                "reference": "v2.3.2",
+                "url": "https://api.github.com/repos/symfony/Console/zipball/v2.3.3",
+                "reference": "v2.3.3",
                 "shasum": ""
             },
             "require": {
@@ -832,21 +832,21 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "http://symfony.com",
-            "time": "2013-07-11 19:36:36"
+            "time": "2013-07-21 12:12:18"
         },
         {
             "name": "symfony/yaml",
-            "version": "v2.3.2",
+            "version": "v2.3.3",
             "target-dir": "Symfony/Component/Yaml",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Yaml.git",
-                "reference": "v2.3.2"
+                "reference": "v2.3.3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Yaml/zipball/v2.3.2",
-                "reference": "v2.3.2",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/v2.3.3",
+                "reference": "v2.3.3",
                 "shasum": ""
             },
             "require": {
@@ -879,20 +879,20 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "http://symfony.com",
-            "time": "2013-07-11 19:36:36"
+            "time": "2013-07-21 12:12:18"
         },
         {
             "name": "twig/twig",
-            "version": "dev-master",
+            "version": "v1.13.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fabpot/Twig.git",
-                "reference": "9a01db60e8b7552955cfcbef7caf0b24dc3119b4"
+                "reference": "v1.13.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fabpot/Twig/zipball/9a01db60e8b7552955cfcbef7caf0b24dc3119b4",
-                "reference": "9a01db60e8b7552955cfcbef7caf0b24dc3119b4",
+                "url": "https://api.github.com/repos/fabpot/Twig/zipball/v1.13.2",
+                "reference": "v1.13.2",
                 "shasum": ""
             },
             "require": {
@@ -901,7 +901,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.14-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -928,7 +928,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2013-08-04 13:12:06"
+            "time": "2013-08-03 15:35:31"
         }
     ],
     "packages-dev": [
