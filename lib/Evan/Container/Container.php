@@ -45,6 +45,9 @@ class Container
 					),
 				'container' => array(
 					'Evan\Controller\ControllerFactory'
+					),
+				'queries_collector' => array(
+					'Evan\Logger\Doctrine\DoctrineSQLLogger'
 					)
 				),
 			'set' => array(
@@ -57,7 +60,7 @@ class Container
 		{
 			return true;
 		}
-		if(($alias == "entityManager" || $alias == "twig" || $alias == "request" || $alias == "time" || $alias == "routing_schema") && preg_match('/.*Controller*/', $asking_class))
+		if(($alias == "entityManager" || $alias == "twig" || $alias == "request" || $alias == "time" || $alias == "routing_schema"|| $alias == "queries_collector" ) && preg_match('/.*Controller*/', $asking_class))
 		{
 			return true;
 		}

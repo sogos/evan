@@ -12,7 +12,7 @@ class ControllerFactory extends ContainerAccess
 
 	public function getDefaultController()
 	{
-		return $this->get();
+		return $this->getController();
 	}
 
 	public function getController($ControllerClass = null) {

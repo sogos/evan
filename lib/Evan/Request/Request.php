@@ -79,7 +79,7 @@ class Request extends ContainerAccess
 			call_user_func_array(array($this->get('controller_'. $route['controller']), $route['action']), $parameters_to_pass);
 
 		} else {
-			$route_not_found_event = $this->get('event_master')->triggerEvent(new RouteNotFoundEvent($this, $this->get('controller_factory')), 'routeNotFound');
+			$this->get('event_master')->triggerEvent(new RouteNotFoundEvent($this, $this->get('controller_factory')), 'routeNotFound');
 		}		
 	}
 }

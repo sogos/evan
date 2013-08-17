@@ -32,7 +32,8 @@ class TestController extends Controller
 			'events_triggered' => $this->get('event_master')->getEventsTriggered(),
 			'route_schema' => $this->get('routing_schema'),
 			'toto' => $toto,
-			'all_plop' => $all_plop
+			'all_plop' => $all_plop,
+			'all_queries' => $this->get('queries_collector')->getQueries()
 			)
 		);
 

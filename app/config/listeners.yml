@@ -1,8 +1,6 @@
 event_listeners:
     base_route:
         class: "Evan\Routing\EventListeners\RouteListener"
-        arguments:
-            "@app"
         subscribe:
             addRouteBefore: addRouteBefore
             addRouteAfter: addRouteAfter
@@ -10,7 +8,10 @@ event_listeners:
 # Listener in charge of EmptyControllerClass submitted to ControllerFactory
     empty_controller_manipulator:
         class: "Evan\Controller\EventListeners\DefaultControllerListener"
-        arguments:
-            "@app"
+        subscribe:
+            newControllerInstanceBefore: newControllerInstanceBefore
+# Listener in charge of Log all SQL Queries
+    empty_controller_manipulator:
+        class: "Evan\Controller\EventListeners\DefaultControllerListener"
         subscribe:
             newControllerInstanceBefore: newControllerInstanceBefore

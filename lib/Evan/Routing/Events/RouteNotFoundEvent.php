@@ -4,7 +4,7 @@ namespace Evan\Routing\Events;
 
 use Evan\Events\Event;
 use Evan\Request\Request;
-use Evan\Conroller\ControllerFactory;
+use Evan\Controller\ControllerFactory;
 
 class RouteNotFoundEvent extends Event
 {
